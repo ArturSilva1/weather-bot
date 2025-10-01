@@ -1,14 +1,14 @@
 # 🌤️ Weather Bot - Chatbot do Clima
 
-Um chatbot interativo desenvolvido em JavaScript que utiliza uma máquina de estados simples para consultar informações do clima através da API OpenWeatherMap.
+Um chatbot interativo desenvolvido em JavaScript que utiliza uma máquina de estados simples para consultar informações de clima através da API OpenWeatherMap.
 
 ## 🎯 Características
 
-- **Interface moderna e responsiva** com design elegante
-- **Máquina de estados** bem estruturada para controle do fluxo conversacional
+- **Interface de webchat responsiva**
+- **Máquina de estados** para o controle do fluxo conversacional
 - **Integração com API externa** (OpenWeatherMap) para dados reais do clima
-- **Tratamento de erros** robusto e logging adequado
-- **Experiência do usuário** fluida com indicadores visuais
+- **Tratamento de erros** e logging
+- **Experiência do usuário** fluida com indicadores visuais do clima
 - **Botões de resposta rápida** para interação facilitada
 
 ## 🚀 Como Executar
@@ -37,11 +37,14 @@ npm install
 
 2. **Configure as variáveis de ambiente:**
    ```bash
-   # Copie o arquivo de exemplo
-   cp env.example .env
+   # Crie o arquivo .env
+   .env
    
    # Edite o arquivo .env e adicione sua chave
    OPENWEATHER_KEY=sua_chave_api_aqui
+
+   # Porta do servidor (opcional - padrão: 3000)
+   PORT=3000
    ```
 
 ### 3. Execução
@@ -59,24 +62,23 @@ O servidor estará disponível em: **http://localhost:3000**
 2. O chatbot iniciará automaticamente com uma saudação
 3. Digite o nome da cidade que deseja consultar
 4. Confirme a cidade quando solicitado (pode usar botões ou digitar)
-5. Veja as informações do clima em um card elegante
+5. As informações do clima serão apresentadas em um card
 6. Decida se quer consultar outra cidade usando os botões
 
-## 🏗️ Arquitetura do Projeto
+## Estrutura do Projeto
 
 ```
 weather-bot/
-├── server.js              # Servidor Express
-├── stateMachine.js        # Lógica da máquina de estados
-├── logger.js              # Sistema de logging
-├── weather-bot/
-│   ├── public/
-│   │   ├── index.html     # Interface do usuário
-│   │   └── chatbot.js     # Lógica do frontend
-│   └── services/
-│       └── apiClient.js   # Cliente da API OpenWeatherMap
-├── package.json           # Dependências e scripts
-└── env.example           # Exemplo de configuração
+├── server.js              # 🚀 Servidor Express (Ponto de entrada)
+├── stateMachine.js        # 🧠 Lógica da máquina de estados
+├── logger.js              # 📝 Sistema de logging
+├── public/                # 🌐 Interface do usuário
+│   ├── index.html         # 📄 Página principal (UI/UX)
+│   └── chatbot.js        # ⚡ Lógica do frontend (JavaScript)
+├── services/              # 🔧 Serviços externos
+│   └── apiClient.js       # 🌤️ Client da API OpenWeatherMap
+├── package.json           # 📦 Dependências e scripts
+└── README.md             # 📚 Documentação
 ```
 
 ## 🔄 Fluxo de Estados
@@ -103,17 +105,6 @@ O chatbot segue uma máquina de estados simples:
 - `morgan` - Logger HTTP
 - `node-fetch` - Cliente HTTP para API
 - `dotenv` - Gerenciamento de variáveis de ambiente
-
-## 🎨 Interface
-
-A interface foi desenvolvida com foco na experiência do usuário:
-
-- **Design responsivo** que funciona em desktop e mobile
-- **Animações suaves** para transições de mensagens
-- **Indicadores visuais** de digitação
-- **Layout moderno** com gradientes e sombras
-- **Cards informativos** para dados do clima com design especial
-- **Botões de resposta rápida** para facilitar interação
 
 ## 🔧 Desenvolvimento
 
