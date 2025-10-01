@@ -136,18 +136,3 @@ O sistema possui logging completo:
 - Transições de estado do chatbot
 - Erros de API e tratamento de exceções
 
-## 🚨 Tratamento de Erros
-
-O projeto inclui tratamento robusto de erros:
-- Validação de entrada do usuário
-- Tratamento de erros da API externa
-- Fallbacks para situações de erro
-- Mensagens amigáveis ao usuário
-
-## 📄 Licença
-
-Este projeto foi desenvolvido como exemplo de chatbot com máquina de estados simples.
-
----
-
-**Desenvolvido com ❤️ usando JavaScript puro e boas práticas de desenvolvimento.**
