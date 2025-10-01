@@ -1,6 +1,6 @@
 // Máquina de estados simples
 const logger = require('./logger');
-const { fetchWeatherByCity } = require('./weather-bot/services/apiClient');
+const { fetchWeatherByCity } = require('./services/apiClient');
 
 async function runTransition({ sessionId, input = '', state = {} }) {
     const current = state.currentState || 'GREETING'

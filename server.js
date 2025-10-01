@@ -9,11 +9,11 @@ require('dotenv').config()
 const app = express()
 app.use(morgan('dev'))
 app.use(express.json())
-app.use(express.static(path.join(__dirname, 'weather-bot/public')))
+app.use(express.static(path.join(__dirname, 'public')))
 
 // Rota para servir a página inicial
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'weather-bot/public', 'index.html'))
+    res.sendFile(path.join(__dirname, 'public', 'index.html'))
 })
 
 app.post('/chat', async (req, res) => {
