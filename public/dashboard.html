@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Bot - Dashboard de Monitoramento</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .dashboard-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .dashboard-header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .dashboard-header p {
+            opacity: 0.9;
+            font-size: 16px;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 30px;
+        }
+
+        .metric-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .metric-card.healthy {
+            border-color: #28a745;
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+        }
+
+        .metric-card.warning {
+            border-color: #ffc107;
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+        }
+
+        .metric-card.danger {
+            border-color: #dc3545;
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+        }
+
+        .metric-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .metric-value {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .metric-label {
+            font-size: 14px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-healthy {
+            background: #28a745;
+        }
+
+        .status-warning {
+            background: #ffc107;
+        }
+
+        .status-danger {
+            background: #dc3545;
+        }
+
+        .refresh-button {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 15px 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .refresh-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 18px;
+            color: #666;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .metrics-grid {
+                grid-template-columns: 1fr;
+                padding: 20px;
+            }
+            
+            .dashboard-header {
+                padding: 20px;
+            }
+            
+            .dashboard-header h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="dashboard-header">
+            <h1>📊 Dashboard de Monitoramento</h1>
+            <p>Métricas em tempo real do Weather Bot</p>
+        </div>
+        
+        <div id="loading" class="loading">
+            🔄 Carregando métricas...
+        </div>
+        
+        <div id="error" class="error-message" style="display: none;">
+            ❌ Erro ao carregar métricas. Verifique se o servidor está rodando.
+        </div>
+        
+        <div id="metrics" class="metrics-grid" style="display: none;">
+            <!-- Métricas serão inseridas aqui via JavaScript -->
+        </div>
+    </div>
+
+    <button id="refreshButton" class="refresh-button" onclick="loadMetrics()">
+        🔄 Atualizar
+    </button>
+
+    <script>
+        async function loadMetrics() {
+            const loading = document.getElementById('loading');
+            const error = document.getElementById('error');
+            const metrics = document.getElementById('metrics');
+            
+            loading.style.display = 'block';
+            error.style.display = 'none';
+            metrics.style.display = 'none';
+            
+            try {
+                const [healthResponse, metricsResponse] = await Promise.all([
+                    fetch('/health'),
+                    fetch('/metrics')
+                ]);
+                
+                if (!healthResponse.ok || !metricsResponse.ok) {
+                    throw new Error('Erro ao carregar dados');
+                }
+                
+                const health = await healthResponse.json();
+                const metricsData = await metricsResponse.json();
+                
+                displayMetrics(health, metricsData);
+                
+            } catch (err) {
+                console.error('Erro:', err);
+                loading.style.display = 'none';
+                error.style.display = 'block';
+            }
+        }
+        
+        function displayMetrics(health, metrics) {
+            const loading = document.getElementById('loading');
+            const metricsContainer = document.getElementById('metrics');
+            
+            loading.style.display = 'none';
+            metricsContainer.style.display = 'grid';
+            
+            const statusClass = health.status === 'healthy' ? 'healthy' : 
+                               metrics.errorRate > 5 ? 'danger' : 'warning';
+            
+            metricsContainer.innerHTML = `
+                <div class="metric-card ${statusClass}">
+                    <div class="metric-icon">${health.status === 'healthy' ? '✅' : '⚠️'}</div>
+                    <div class="metric-value">
+                        <span class="status-indicator status-${health.status === 'healthy' ? 'healthy' : 'warning'}"></span>
+                        ${health.status === 'healthy' ? 'Saudável' : 'Atenção'}
+                    </div>
+                    <div class="metric-label">Status do Sistema</div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-icon">⏱️</div>
+                    <div class="metric-value">${metrics.uptime}</div>
+                    <div class="metric-label">Tempo Online</div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-icon">📊</div>
+                    <div class="metric-value">${metrics.requests}</div>
+                    <div class="metric-label">Total de Requisições</div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-icon">🌤️</div>
+                    <div class="metric-value">${metrics.weatherQueries}</div>
+                    <div class="metric-label">Consultas Climáticas</div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-icon">📈</div>
+                    <div class="metric-value">${metrics.requestsPerMinute}</div>
+                    <div class="metric-label">Req/Min</div>
+                </div>
+                
+                <div class="metric-card ${metrics.errorRate > 5 ? 'danger' : metrics.errorRate > 1 ? 'warning' : 'healthy'}">
+                    <div class="metric-icon">${metrics.errorRate > 5 ? '❌' : metrics.errorRate > 1 ? '⚠️' : '✅'}</div>
+                    <div class="metric-value">${metrics.errorRate}%</div>
+                    <div class="metric-label">Taxa de Erro</div>
+                </div>
+            `;
+        }
+        
+        // Carregar métricas automaticamente
+        document.addEventListener('DOMContentLoaded', loadMetrics);
+        
+        // Atualizar a cada 30 segundos
+        setInterval(loadMetrics, 30000);
+    </script>
+</body>
+</html>

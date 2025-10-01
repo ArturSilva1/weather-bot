@@ -7,7 +7,12 @@ async function runTransition({ sessionId, input = '', state = {} }) {
     const context = state.context || {}
     
     
-    logger.info(`Session ${sessionId} state=${current} input=${input}`)
+    logger.info(`Processando transição de estado`, { 
+        sessionId, 
+        currentState: current, 
+        input, 
+        context: Object.keys(context).length > 0 ? context : undefined 
+    })
     
     
     switch (current) {
@@ -34,14 +39,26 @@ async function runTransition({ sessionId, input = '', state = {} }) {
     if (normalized.startsWith('s')) {
     // Auto-transição para FETCHING
     if (!context.city) return { nextState: 'ASK_CITY', reply: 'Preciso do nome de uma cidade primeiro. Qual é?' }
+    const startTime = Date.now();
     try {
-    const weather = await fetchWeatherByCity(context.city)
-    context.weather = weather
-    const reply = `✅ Clima encontrado para ${context.city}!`
-    return { nextState: 'SHOW_RESULTS', reply, data: { context } }
+        const weather = await fetchWeatherByCity(context.city);
+        const duration = Date.now() - startTime;
+        
+        context.weather = weather;
+        logger.weatherQuery(context.city, true, duration);
+        
+        const reply = `✅ Clima encontrado para ${context.city}!`;
+        return { nextState: 'SHOW_RESULTS', reply, data: { context } };
     } catch (err) {
-    logger.error('Erro ao buscar clima', err)
-    return { nextState: 'SHOW_RESULTS', reply: '❌ Houve um erro ao consultar o clima. Deseja tentar novamente? (sim/não)' }
+        const duration = Date.now() - startTime;
+        logger.weatherQuery(context.city, false, duration);
+        logger.error('Erro ao buscar clima', { 
+            sessionId, 
+            city: context.city, 
+            error: err.message,
+            duration: `${duration}ms`
+        });
+        return { nextState: 'SHOW_RESULTS', reply: '❌ Houve um erro ao consultar o clima. Deseja tentar novamente? (sim/não)' };
     }
     }
     if (normalized.startsWith('n')) {
@@ -54,14 +71,26 @@ async function runTransition({ sessionId, input = '', state = {} }) {
     
     case 'FETCHING': {
     if (!context.city) return { nextState: 'ASK_CITY', reply: 'Preciso do nome de uma cidade primeiro. Qual é?' }
+    const startTime = Date.now();
     try {
-    const weather = await fetchWeatherByCity(context.city)
-    context.weather = weather
-    const reply = `Em ${context.city}, a temperatura atual é ${weather.temp}°C, com sensação de ${weather.feels_like}°C. Condição: ${weather.description}. Deseja consultar outra cidade? (sim/não)`
-    return { nextState: 'SHOW_RESULTS', reply, data: { context } }
+        const weather = await fetchWeatherByCity(context.city);
+        const duration = Date.now() - startTime;
+        
+        context.weather = weather;
+        logger.weatherQuery(context.city, true, duration);
+        
+        const reply = `Em ${context.city}, a temperatura atual é ${weather.temp}°C, com sensação de ${weather.feels_like}°C. Condição: ${weather.description}. Deseja consultar outra cidade? (sim/não)`;
+        return { nextState: 'SHOW_RESULTS', reply, data: { context } };
     } catch (err) {
-    logger.error('Erro ao buscar clima', err)
-    return { nextState: 'SHOW_RESULTS', reply: 'Houve um erro ao consultar o clima. Deseja tentar novamente? (sim/não)' }
+        const duration = Date.now() - startTime;
+        logger.weatherQuery(context.city, false, duration);
+        logger.error('Erro ao buscar clima', { 
+            sessionId, 
+            city: context.city, 
+            error: err.message,
+            duration: `${duration}ms`
+        });
+        return { nextState: 'SHOW_RESULTS', reply: 'Houve um erro ao consultar o clima. Deseja tentar novamente? (sim/não)' };
     }
     }
     
